@@ -1,95 +1,154 @@
-# Customer Churn Prediction
+# Banking Analytics Suite: Customer Churn and Salary Prediction
 
-A deep learning-based solution for predicting customer churn using TensorFlow and Neural Networks. This project implements a binary classification model to predict whether a customer is likely to leave a bank's services based on various customer attributes.
+A comprehensive deep learning solution implementing both binary classification for customer churn prediction and regression for salary estimation using TensorFlow and Neural Networks.
 
-## Project Structure
+## Project Architecture
 ```
-├── app.py                     # Streamlit web application
-├── Churn_Modelling.csv       # Dataset file
-├── experiments.ipynb         # Model development and training notebook
-├── prediction.ipynb          # Model inference notebook
-├── model.h5                  # Trained neural network model
-├── requirements.txt          # Project dependencies
-├── scaler.pkl               # StandardScaler for feature scaling
-├── label_encoder_gender.pkl # Label encoder for gender feature
-├── onehot_encoder_geo.pkl   # OneHot encoder for geography feature
-└── logs/                    # TensorBoard logging directory
+├── app.py                     # Churn prediction Streamlit interface
+├── regression.py             # Salary prediction Streamlit interface
+├── Churn_Modelling.csv      # Source dataset
+├── experiments.ipynb        # Primary model development notebook
+├── hyperparameter_tuning.ipynb # Model optimization notebook
+├── regression.ipynb         # Salary prediction model notebook
+├── prediction.ipynb         # Inference notebook
+├── model.h5                 # Churn prediction model
+├── regression_model.h5      # Salary prediction model
+├── requirements.txt         # Project dependencies
+├── preprocessing/
+│   ├── scaler.pkl          # StandardScaler for feature normalization
+│   ├── label_encoder_gender.pkl # Gender categorical encoder
+│   └── onehot_encoder_geo.pkl  # Geography one-hot encoder
+└── logs/
+    ├── fit/                # Churn model TensorBoard logs
+    └── regressionlogs/    # Salary model TensorBoard logs
 ```
 
-## Technical Stack
-- **Deep Learning Framework**: TensorFlow 2.15.0
-- **Model Architecture**: Sequential Neural Network with:
-  - Input Layer: Dense(64, activation='relu')
-  - Hidden Layer: Dense(32, activation='relu')
-  - Output Layer: Dense(1, activation='sigmoid')
-- **Optimizer**: Adam (learning_rate=0.01)
+## Technical Implementation
+
+### Deep Learning Architecture
+
+#### Churn Prediction Model
+- **Architecture**: Sequential Neural Network
+  - Input Layer: Dense(64, ReLU)
+  - Hidden Layer: Dense(32, ReLU)
+  - Output Layer: Dense(1, Sigmoid)
+- **Optimizer**: Adam (lr=0.01)
 - **Loss Function**: Binary Cross-Entropy
-- **Preprocessing**: StandardScaler, LabelEncoder, OneHotEncoder
-- **Web Framework**: Streamlit
-- **Data Processing**: Pandas, NumPy
-- **Model Monitoring**: TensorBoard
+- **Metrics**: Accuracy
+- **Early Stopping**: patience=20, monitor='val_loss'
 
-## Features
-- Binary classification for customer churn prediction
-- Real-time prediction through web interface
-- Automated feature preprocessing
-- Model performance monitoring via TensorBoard
-- Support for categorical (Geography, Gender) and numerical features
+#### Salary Prediction Model
+- **Architecture**: Sequential Neural Network
+  - Input Layer: Dense(64, ReLU)
+  - Hidden Layer: Dense(32, ReLU)
+  - Output Layer: Dense(1, Linear)
+- **Loss Function**: Mean Absolute Error
+- **Metrics**: MAE
+- **Early Stopping**: patience=10
 
-## Model Features
-- Credit Score
-- Geography (France, Spain, Germany)
-- Gender
-- Age
-- Tenure
-- Balance
-- Number of Products
-- Has Credit Card
-- Is Active Member
-- Estimated Salary
+### Hyperparameter Optimization
+- **Framework**: scikit-learn GridSearchCV
+- **Parameters Tuned**:
+  - Neurons: [16, 32, 64, 128]
+  - Hidden Layers: [1, 2]
+  - Epochs: [50, 100]
+- **Cross-validation**: 3-fold
+- **Parallel Processing**: Enabled (n_jobs=-1)
+
+### Data Preprocessing Pipeline
+- **Categorical Encoding**:
+  - Geography: OneHotEncoder(handle_unknown='ignore')
+  - Gender: LabelEncoder
+- **Numerical Features**: StandardScaler
+- **Train-Test Split**: 80-20 ratio
+- **Random State**: 42
+
+### Feature Set
+- **Numerical Features**:
+  - Credit Score
+  - Age
+  - Tenure
+  - Balance
+  - Number of Products
+  - Estimated Salary
+- **Categorical Features**:
+  - Geography (France, Spain, Germany)
+  - Gender
+  - Has Credit Card
+  - Is Active Member
 
 ## Installation
-1. Clone the repository
+
+1. Create and activate virtual environment:
+```bash
+python -m venv env
+source env/bin/activate  # Linux/Mac
+env\Scripts\activate     # Windows
+```
+
 2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
 ## Usage
-### Web Application
-Run the Streamlit app:
+
+### Web Applications
+Launch Churn Prediction interface:
 ```bash
 streamlit run app.py
 ```
 
-### Jupyter Notebooks
-- `experiments.ipynb`: Model development, training, and evaluation
-- `prediction.ipynb`: Sample inference code
-
-## Model Training
-The model implements early stopping with patience=20 and monitors validation loss for optimal performance. Training metrics are logged using TensorBoard for visualization and monitoring.
-
-## Performance Monitoring
-View training metrics:
+Launch Salary Prediction interface:
 ```bash
-tensorboard --logdir logs/fit
+streamlit run regression.py
 ```
 
-## Data Preprocessing
-- Categorical encoding:
-  - Gender: Label Encoding
-  - Geography: One-Hot Encoding
-- Numerical features: Standard Scaling
-- Feature engineering: Automated in preprocessing pipeline
+### Model Training
+```python
+# Churn Prediction
+python experiments.ipynb
+
+# Salary Prediction
+python regression.ipynb
+
+# Hyperparameter Optimization
+python hyperparameter_tuning.ipynb
+```
+
+### TensorBoard Visualization
+```bash
+tensorboard --logdir logs/fit  # Churn model metrics
+tensorboard --logdir regressionlogs/fit  # Salary model metrics
+```
 
 ## Dependencies
-- tensorflow==2.15.0
-- pandas
-- numpy
-- scikit-learn
-- tensorboard
-- matplotlib
-- streamlit
+```
+tensorflow==2.15.0
+pandas
+numpy
+scikit-learn
+tensorboard
+matplotlib
+streamlit
+keras
+```
+
+## Model Performance Monitoring
+- **TensorBoard Integration**: Real-time monitoring of:
+  - Loss curves
+  - Accuracy metrics
+  - Model weights/biases distributions
+  - Learning rate progression
+- **Validation Metrics**: 
+  - Churn Prediction: Binary Accuracy, AUC-ROC
+  - Salary Prediction: MAE, MSE
 
 ## Production Deployment
-The model is deployed using Streamlit, providing an interactive web interface for real-time predictions. All necessary preprocessing steps are integrated into the prediction pipeline.
+Both models are deployed via Streamlit, featuring:
+- Interactive web interfaces
+- Real-time predictions
+- Automated preprocessing pipeline
+- Input validation
+- Prediction probability visualization (Churn model)
+- Salary estimation with confidence intervals (Regression model)
